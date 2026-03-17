@@ -2,31 +2,50 @@ import { Request, Response } from 'express';
 import { prisma } from '../../config/db.js';
 import { TaskStatus } from '@prisma/client';
 
+type AuthenticatedRequest = Request & {
+  user: {
+    id: string;
+    email: string;
+  };
+};
+
+const isTaskStatus = (value: unknown): value is TaskStatus =>
+  typeof value === 'string' &&
+  (Object.values(TaskStatus) as string[]).includes(value);
+
 
 
 // Get all tasks (with pagination, filter, search)
-export const getTasks = async (req: Request, res: Response): Promise<void> => {
+export const getTasks = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   try {
     const userId = req.user!.id;
 
     // Parse query parameters
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    const status = req.query.status as TaskStatus | undefined;
-    const search = req.query.search as string | undefined;
+    const status = isTaskStatus(req.query.status) ? req.query.status : undefined;
+    const search =
+      typeof req.query.search === 'string' ? req.query.search : undefined;
 
     // Validate pagination
     const safePage = page > 0 ? page : 1;
-    const safeLimit = limit > 0 && limit <= 100 ? limit : 4;
+    const safeLimit = limit > 0 && limit <= 100 ? limit : 10;
     const skip = (safePage - 1) * safeLimit;
 
     // Build where clause
-    const where: any = {
+    const where: {
+      userId: string;
+      status?: TaskStatus;
+      title?: { contains: string; mode: 'insensitive' };
+    } = {
       userId,
     };
 
     // Add status filter
-    if (status && Object.values(TaskStatus).includes(status)) {
+    if (status) {
       where.status = status;
     }
 
@@ -81,9 +100,16 @@ export const getTasks = async (req: Request, res: Response): Promise<void> => {
 };
 
 // Get single task
-export const getTask = async (req: Request, res: Response): Promise<void> => {
+export const getTask = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   try {
     const { id } = req.params;
+    if (typeof id !== 'string') {
+      res.status(400).json({ error: 'Validation error', details: ['Invalid id'] });
+      return;
+    }
     const userId = req.user!.id;
 
     const task = await prisma.task.findUnique({
@@ -110,7 +136,7 @@ export const getTask = async (req: Request, res: Response): Promise<void> => {
 
 // Create task
 export const createTask = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
@@ -122,6 +148,14 @@ export const createTask = async (
       res.status(400).json({
         error: 'Validation error',
         details: ['Title and description are required'],
+      });
+      return;
+    }
+
+    if (typeof title !== 'string' || typeof description !== 'string') {
+      res.status(400).json({
+        error: 'Validation error',
+        details: ['Title and description must be strings'],
       });
       return;
     }
@@ -144,7 +178,7 @@ export const createTask = async (
     }
 
     // Validate status if provided
-    if (status && !Object.values(TaskStatus).includes(status)) {
+    if (status !== undefined && !isTaskStatus(status)) {
       res.status(400).json({
         error: 'Validation error',
         details: ['Invalid status. Must be: PENDING, IN_PROGRESS, or COMPLETED'],
@@ -157,7 +191,7 @@ export const createTask = async (
       data: {
         title: title.trim(),
         description: description.trim(),
-        status: status || TaskStatus.PENDING,
+        status: status ?? TaskStatus.PENDING,
         userId,
       },
     });
@@ -174,11 +208,15 @@ export const createTask = async (
 
 // Update task
 export const updateTask = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
     const { id } = req.params;
+    if (typeof id !== 'string') {
+      res.status(400).json({ error: 'Validation error', details: ['Invalid id'] });
+      return;
+    }
     const userId = req.user!.id;
     const { title, description, status } = req.body;
 
@@ -199,9 +237,20 @@ export const updateTask = async (
     }
 
     // Build update data
-    const updateData: any = {};
+    const updateData: {
+      title?: string;
+      description?: string;
+      status?: TaskStatus;
+    } = {};
 
     if (title !== undefined) {
+      if (typeof title !== 'string') {
+        res.status(400).json({
+          error: 'Validation error',
+          details: ['Title must be a string'],
+        });
+        return;
+      }
       if (title.trim().length < 3) {
         res.status(400).json({
           error: 'Validation error',
@@ -213,11 +262,26 @@ export const updateTask = async (
     }
 
     if (description !== undefined) {
+      if (typeof description !== 'string') {
+        res.status(400).json({
+          error: 'Validation error',
+          details: ['Description must be a string'],
+        });
+        return;
+      }
+      const trimmedDescription = description.trim();
+      if (trimmedDescription.length < 10 || trimmedDescription.length > 2000) {
+        res.status(400).json({
+          error: 'Validation error',
+          details: ['Description must be between 10 and 2000 characters'],
+        });
+        return;
+      }
       updateData.description = description.trim();
     }
 
     if (status !== undefined) {
-      if (!Object.values(TaskStatus).includes(status)) {
+      if (!isTaskStatus(status)) {
         res.status(400).json({
           error: 'Validation error',
           details: [
@@ -256,11 +320,15 @@ export const updateTask = async (
 
 // Delete task
 export const deleteTask = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
     const { id } = req.params;
+    if (typeof id !== 'string') {
+      res.status(400).json({ error: 'Validation error', details: ['Invalid id'] });
+      return;
+    }
     const userId = req.user!.id;
 
     // Check if task exists and belongs to user
