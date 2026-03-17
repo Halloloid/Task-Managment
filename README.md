@@ -6,7 +6,7 @@ A production-ready task management application with authentication, CRUD operati
 
 ## 🔗 Live Deployment
 
-- **Frontend (Live Demo):** https://your-frontend.vercel.app
+- **Frontend (Live Demo):** https://task-managment-vert.vercel.app/
 - **Backend API:** https://task-managment-c56d.onrender.com
 - **API Health Check:** https://task-managment-c56d.onrender.com/health
 - **GitHub Repository:** https://github.com/Halloloid/task-manager
