@@ -1,0 +1,50 @@
+// Prisma Schema for Task Manager
+// Production-ready with indexes, constraints, and proper types
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // bcrypt hashed - NEVER store plain text
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tasks Task[]
+
+  // Indexes for performance
+  @@index([email])
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  description String     @db.Text // Allow longer descriptions
+  status      TaskStatus @default(PENDING)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Foreign key
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes for common queries
+  @@index([userId]) // Fast lookup of user's tasks
+  @@index([status]) // Fast filtering by status
+  @@index([createdAt]) // Fast sorting by date
+  @@index([userId, status]) // Composite index for filtered user queries
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
