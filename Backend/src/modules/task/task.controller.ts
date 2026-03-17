@@ -2,12 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../../config/db.js';
 import { TaskStatus } from '@prisma/client';
 
-type AuthenticatedRequest = Request & {
-  user: {
-    id: string;
-    email: string;
-  };
-};
+
 
 const isTaskStatus = (value: unknown): value is TaskStatus =>
   typeof value === 'string' &&
@@ -17,7 +12,7 @@ const isTaskStatus = (value: unknown): value is TaskStatus =>
 
 // Get all tasks (with pagination, filter, search)
 export const getTasks = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response
 ): Promise<void> => {
   try {
@@ -101,7 +96,7 @@ export const getTasks = async (
 
 // Get single task
 export const getTask = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response
 ): Promise<void> => {
   try {
@@ -136,7 +131,7 @@ export const getTask = async (
 
 // Create task
 export const createTask = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response
 ): Promise<void> => {
   try {
@@ -208,7 +203,7 @@ export const createTask = async (
 
 // Update task
 export const updateTask = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response
 ): Promise<void> => {
   try {
@@ -320,7 +315,7 @@ export const updateTask = async (
 
 // Delete task
 export const deleteTask = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response
 ): Promise<void> => {
   try {
