@@ -9,7 +9,7 @@ A production-ready task management application with authentication, CRUD operati
 - **Frontend (Live Demo):** https://task-managment-vert.vercel.app/
 - **Backend API:** https://task-managment-c56d.onrender.com
 - **API Health Check:** https://task-managment-c56d.onrender.com/health
-- **GitHub Repository:** https://github.com/Halloloid/task-manager
+- **GitHub Repository:** https://github.com/Halloloid/Task-Managment
 
 ---
 
@@ -50,22 +50,22 @@ A production-ready task management application with authentication, CRUD operati
 ## 🛠️ Tech Stack
 
 ### Backend
-- **Runtime:** Node.js 18+
-- **Framework:** Express.js 4.21
-- **Language:** TypeScript 5.7
+- **Runtime:** Node.js 
+- **Framework:** Express.js 
+- **Language:** TypeScript 
 - **Database:** PostgreSQL (Neon)
-- **ORM:** Prisma 5.22
+- **ORM:** Prisma 
 - **Authentication:** JWT (jsonwebtoken)
 - **Password Hashing:** bcrypt
 - **Deployment:** Render
 
 ### Frontend
-- **Framework:** React 18.3
-- **Build Tool:** Vite 6.0
-- **Language:** TypeScript 5.7
-- **Routing:** React Router 6.27
-- **HTTP Client:** Axios 1.7
-- **Styling:** Tailwind CSS 3.4
+- **Framework:** React 
+- **Build Tool:** Vite 
+- **Language:** TypeScript 
+- **Routing:** React Router 
+- **HTTP Client:** Axios 
+- **Styling:** Tailwind CSS 
 - **Deployment:** Vercel
 
 ### Database Schema
@@ -441,7 +441,7 @@ npm install
 npm run dev
 ```
 
-Frontend runs on: http://localhost:3000
+Frontend runs on: http://localhost:5173
 
 ---
 
@@ -451,7 +451,7 @@ Frontend runs on: http://localhost:3000
 ```bash
 # Server
 PORT=5000
-NODE_ENV=production
+NODE_ENV=devlopment
 
 # Database (Get from Neon PostgreSQL)
 DATABASE_URL="postgresql://user:password@host:5432/database?sslmode=require"
@@ -464,7 +464,7 @@ JWT_EXPIRES_IN="7d"
 COOKIE_MAX_AGE=604800000
 
 # Frontend URL (for CORS)
-FRONTEND_URL="https://your-frontend.vercel.app"
+FRONTEND_URL="https://task-managment-vert.vercel.app"
 ```
 
 ### Frontend (.env)
