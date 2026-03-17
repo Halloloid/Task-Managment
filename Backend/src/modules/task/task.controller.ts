@@ -17,7 +17,7 @@ export const getTasks = async (req: Request, res: Response): Promise<void> => {
 
     // Validate pagination
     const safePage = page > 0 ? page : 1;
-    const safeLimit = limit > 0 && limit <= 100 ? limit : 10;
+    const safeLimit = limit > 0 && limit <= 100 ? limit : 4;
     const skip = (safePage - 1) * safeLimit;
 
     // Build where clause
