@@ -13,7 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-    origin: "https://task-managment-vert.vercel.app/",
+    origin: "https://task-managment-vert.vercel.app",
     credentials: true
 }))
 app.use(cookieParser())
